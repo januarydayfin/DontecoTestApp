@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Donteco Music Player</string>
     <string name="choose_crossfade_duration">Drag Crossfade Duration</string>
+    <string name="donteco_minimal_music_app">Donteco Minimal Music App</string>
+    <string name="open_2_file">Open 2 File</string>
+    <string name="open_1_file">Open 1 File</string>
 </resources>

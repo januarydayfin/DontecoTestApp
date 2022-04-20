@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
+    <TextView
+        android:textAlignment="center"
+        android:textSize="50sp"
+        android:text="@string/donteco_minimal_music_app"
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/resetButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <androidx.cardview.widget.CardView
         android:id="@+id/open_1_file"
         style="@style/CardStyle"
@@ -19,11 +30,12 @@
         app:layout_constraintVertical_bias="0.23000002">
 
         <TextView
+            android:id="@+id/first_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="10dp"
-            android:text="Open 1 File"
+            android:text="@string/open_1_file"
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 
@@ -39,22 +51,26 @@
         app:layout_constraintTop_toBottomOf="@+id/open_1_file">
 
         <TextView
+            android:id="@+id/second_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="10dp"
-            android:text="Open 2 File"
+            android:text="@string/open_2_file"
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/resetButton"
-        android:layout_width="@dimen/circle_btn_size"
+        app:fabCustomSize="@dimen/circle_btn_size"
         android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:src="@drawable/ic_circle"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toTopOf="@+id/play_button"
         app:layout_constraintEnd_toEndOf="@+id/play_button"
-        app:layout_constraintStart_toStartOf="@+id/play_button" />
+        app:layout_constraintStart_toStartOf="@+id/play_button"
+        tools:ignore="ContentDescription" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/play_button"
@@ -72,7 +88,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_play_pause" />
+            android:src="@drawable/ic_play_pause"
+            tools:ignore="ContentDescription" />
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -114,5 +131,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/textView"
         app:layout_constraintEnd_toStartOf="@+id/textView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView" />
+        app:layout_constraintTop_toTopOf="@+id/textView"
+        tools:ignore="ContentDescription" />
 </androidx.constraintlayout.widget.ConstraintLayout>
