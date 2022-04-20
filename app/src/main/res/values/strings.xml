@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Donteco Music Player</string>
+    <string name="choose_crossfade_duration">Drag Crossfade Duration</string>
 </resources>

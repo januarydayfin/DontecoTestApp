@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +14,7 @@ import com.krayapp.dontecotestapp.MainViewModel
 import com.krayapp.dontecotestapp.MusicOnOpenResult
 import com.krayapp.dontecotestapp.R
 import com.krayapp.dontecotestapp.databinding.MainFragmentBinding
+import com.krayapp.dontecotestapp.toast
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -23,11 +25,12 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     companion object {
         fun newInstance(): Fragment = MainFragment()
     }
+
     private val FADE_IN = true
     private val FADE_OUT = false
 
     private val viewBinding: MainFragmentBinding by viewBinding()
-    private val viewModel:MainViewModel by viewModel()
+    private val viewModel: MainViewModel by viewModel()
 
     private val mediaPlayer: MediaPlayer by inject()
 
@@ -36,14 +39,20 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     private var baseJob: Job? = null
     private val baseScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private var currentVolume:Float = 0f
+    private var currentVolume: Float = 0f
+    private var currentFadeDuration = 2000
+    private var currentMusicList: MutableList<Uri?> = mutableListOf()
 
     private val musicResult = registerForActivityResult(MusicOnOpenResult()) { result ->
         if (result != null) {
-            mediaPlayer.setDataSource(requireContext(),result)
-            mediaPlayer.prepare()
-            mediaPlayerFileStatus = true
+            viewModel.addTrack(result)
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.volumeFlow.onEach { volume -> setVolume(volume) }.launchIn(lifecycleScope)
+        viewModel.musicFlow.onEach { music -> addMusicToPlayList(music) }.launchIn(lifecycleScope)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,40 +60,78 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         initButtons()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.volumeFlow.onEach { volume ->
-            currentVolume = volume
-            mediaPlayer.setVolume(volume,currentVolume)
-            println("VVV $volume")
-        }.launchIn(lifecycleScope)
-        /*viewModel.liveData.observe(viewLifecycleOwner){
-            volume ->
-            currentVolume = volume
-            mediaPlayer.setVolume(currentVolume,volume)
-        }*/
+    private fun startMusicExplorerJob() {
+        baseJob?.cancel()
+        baseJob = baseScope.launch {
+            mediaPlayer.reset()
+            musicResult.launch("")
+        }
+    }
+
+    private fun playMusic() {
+        mediaPlayer.setDataSource(requireContext(), currentMusicList[0]!!)
+        mediaPlayer.prepare()
+    }
+
+    private fun addMusicToPlayList(track: Uri?) {
+        if (track != null && !mediaPlayerFileStatus) {
+            currentMusicList.add(track)
+            viewBinding.open1File.setCardBackgroundColor(resources.getColor(R.color.light_green))
+            if (currentMusicList.size >= 2) {
+                viewBinding.open2File.setCardBackgroundColor(resources.getColor(R.color.light_green))
+                mediaPlayer.reset()
+                playMusic()
+                mediaPlayerFileStatus = true
+            } else {
+                toast("Нужно 2 файла")
+            }
+        }
+    }
+
+    private fun setVolume(volume: Float) {
+        currentVolume = volume
+        mediaPlayer.setVolume(volume, currentVolume)
+    }
+
+    private fun setVolumeOnPause(){
+        currentVolume = 0f
+        viewModel.setOVolume()
     }
     private fun initButtons() {
         with(viewBinding) {
             open1File.setOnClickListener {
-                baseJob?.cancel()
-                baseJob = baseScope.launch {
-                    mediaPlayer.reset()
-                    musicResult.launch("")
-                }
+                startMusicExplorerJob()
+            }
+            open2File.setOnClickListener {
+                startMusicExplorerJob()
             }
             playButton.setOnClickListener {
-                if(mediaPlayer.isPlaying){
+                if (mediaPlayer.isPlaying) {
+                    setVolumeOnPause()
                     mediaPlayer.pause()
-                }else{
-                    if(mediaPlayerFileStatus) {
+                } else {
+                    if (mediaPlayerFileStatus) {
                         mediaPlayer.start()
-                        viewModel.startFade(2000, FADE_IN)
-                    }else{
-                        Toast.makeText(context,"Файлы не загружены", Toast.LENGTH_SHORT ).show()
+                        viewModel.startFade(currentFadeDuration, FADE_IN)
+                    } else {
+                        toast("Файлы не загружены")
                     }
                 }
             }
+            fadeBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(p0: SeekBar?, progress: Int, p2: Boolean) {
+                    currentFadeDuration = progress * 1000
+                    viewBinding.durationCount.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(p0: SeekBar?) {
+
+                }
+
+            })
         }
     }
 }

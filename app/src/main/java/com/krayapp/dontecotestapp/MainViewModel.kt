@@ -1,24 +1,26 @@
 package com.krayapp.dontecotestapp
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 
-class MainViewModel() : ViewModel() {
+class MainViewModel : ViewModel() {
     private val _volumeFlow: MutableStateFlow<Float> = MutableStateFlow(0f)
     val volumeFlow: StateFlow<Float> = _volumeFlow.asStateFlow()
 
-    private val _liveData = MutableLiveData<Float>()
-    val liveData: LiveData<Float>
-        get() = _liveData
+    private val _musicFlow: MutableStateFlow<Uri?> = MutableStateFlow(null)
+    val musicFlow: StateFlow<Uri?> = _musicFlow.asStateFlow()
 
     private val MAX_VOLUME = 1f
-    private val FADE_INTERVAL = 20L
+    private val FADE_INTERVAL = 50L
     private var volume: Float = 0f
+
+    fun addTrack(track: Uri?) {
+        _musicFlow.value = track
+    }
 
     fun startFade(fadeDuration: Int, fadeIn: Boolean) {
         val numberSteps = fadeDuration / FADE_INTERVAL.toFloat() //
@@ -40,17 +42,19 @@ class MainViewModel() : ViewModel() {
                 }
             }
         }
-        timer.schedule(timerTask, FADE_INTERVAL,FADE_INTERVAL)
+        timer.schedule(timerTask, FADE_INTERVAL, FADE_INTERVAL)
     }
 
     private fun fadeStep(delta: Float, fadeIn: Boolean) {
         _volumeFlow.value = volume // равняет громкость к измененной громкости
         if (fadeIn) {
             volume += delta
-            _volumeFlow.value = volume
         } else {
             volume -= delta
-            _volumeFlow.value = volume
         }
+        _volumeFlow.value = volume
+    }
+    fun setOVolume(){
+        volume = 0f
     }
 }
