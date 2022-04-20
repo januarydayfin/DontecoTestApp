@@ -36,6 +36,8 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     private var baseJob: Job? = null
     private val baseScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    private var currentVolume:Float = 0f
+
     private val musicResult = registerForActivityResult(MusicOnOpenResult()) { result ->
         if (result != null) {
             mediaPlayer.setDataSource(requireContext(),result)
@@ -51,6 +53,16 @@ class MainFragment : Fragment(R.layout.main_fragment) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.volumeFlow.onEach { volume ->
+            currentVolume = volume
+            mediaPlayer.setVolume(volume,currentVolume)
+            println("VVV $volume")
+        }.launchIn(lifecycleScope)
+        /*viewModel.liveData.observe(viewLifecycleOwner){
+            volume ->
+            currentVolume = volume
+            mediaPlayer.setVolume(currentVolume,volume)
+        }*/
     }
     private fun initButtons() {
         with(viewBinding) {
@@ -67,7 +79,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
                 }else{
                     if(mediaPlayerFileStatus) {
                         mediaPlayer.start()
-                        viewModel.startFade(1000, FADE_IN)
+                        viewModel.startFade(2000, FADE_IN)
                     }else{
                         Toast.makeText(context,"Файлы не загружены", Toast.LENGTH_SHORT ).show()
                     }

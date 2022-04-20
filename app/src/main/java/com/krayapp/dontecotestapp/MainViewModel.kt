@@ -16,11 +16,13 @@ class MainViewModel() : ViewModel() {
     val liveData: LiveData<Float>
         get() = _liveData
 
-    private val FADE_INTERVAL = 250
+    private val MAX_VOLUME = 1f
+    private val FADE_INTERVAL = 20L
     private var volume: Float = 0f
 
     fun startFade(fadeDuration: Int, fadeIn: Boolean) {
-        val delta = fadeDuration / FADE_INTERVAL.toFloat() // количество ступеней снижения/повышения
+        val numberSteps = fadeDuration / FADE_INTERVAL.toFloat() //
+        val delta = MAX_VOLUME / numberSteps
         val timer = Timer(true)
         val timerTask = object : TimerTask() {
             override fun run() {
@@ -38,6 +40,7 @@ class MainViewModel() : ViewModel() {
                 }
             }
         }
+        timer.schedule(timerTask, FADE_INTERVAL,FADE_INTERVAL)
     }
 
     private fun fadeStep(delta: Float, fadeIn: Boolean) {
