@@ -61,10 +61,12 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     }
 
     private fun startMusicExplorerJob() {
-        baseJob?.cancel()
-        baseJob = baseScope.launch {
-            mediaPlayer.reset()
-            musicResult.launch("")
+        if(!mediaPlayerFileStatus) {
+            baseJob?.cancel()
+            baseJob = baseScope.launch {
+                mediaPlayer.reset()
+                musicResult.launch("")
+            }
         }
     }
 
